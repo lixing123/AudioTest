@@ -10,4 +10,6 @@
 
 @interface PlayAndRecord : NSObject
 
+-(void)start;
+
 @end

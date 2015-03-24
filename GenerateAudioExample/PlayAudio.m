@@ -42,6 +42,7 @@ static void checkErr(OSStatus error, const char *operation)
 static void MyAQOutputCallback(void* inUserData,
                                AudioQueueRef inAQ,
                                AudioQueueBufferRef inCompleteAQBuffer){
+    NSLog(@"MyAQOuputCallback...");
     MyPlayer* player = (MyPlayer*)inUserData;
     if (player->isDone) {
         return;

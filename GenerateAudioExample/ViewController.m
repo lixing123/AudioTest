@@ -10,6 +10,7 @@
 #import "RecordAudio.h"
 #import "PlayAudio.h"
 #import "Converter.h"
+#import "PlayAndRecord.h"
 
 @interface ViewController ()
 
@@ -28,12 +29,18 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [record stop];
     });*/
+    /*
+    PlayAudio* play = [[PlayAudio alloc] init];
+    [play start];
+    */
     
-    /*PlayAudio* play = [[PlayAudio alloc] init];
-    [play start];*/
-    
-    Converter* converter = [[Converter alloc] init];
+    /*Converter* converter = [[Converter alloc] init];
     [converter startConvert];
+    */
+    
+    
+    PlayAndRecord* playAndRecord = [[PlayAndRecord alloc] init];
+    [playAndRecord start];
     
 }
 

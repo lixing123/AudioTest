@@ -34,7 +34,7 @@ typedef struct MyAudioConverterSettings{
     AudioFileID                 outputFile;
 } MyAudioConverterSettings;
 
-void Convert(MyAudioConverterSettings* mySettings){
+void Converter(MyAudioConverterSettings* mySettings){
     //32KB is a good start
     UInt32 outputBufferSize = 32*1024;
     UInt32 sizePerPacket = mySettings->outputFormat.mBytesPerPacket;
@@ -53,7 +53,9 @@ void Convert(MyAudioConverterSettings* mySettings){
         
         //read data from the input file
         UInt32 frameCount = packetPerBuffer;
-        checkErr(ExtAudioFileRead(mySettings->inputFile, &frameCount, &convertedBuffer),
+        checkErr(ExtAudioFileRead(mySettings->inputFile,
+                                  &frameCount,
+                                  &convertedBuffer),
                  "Couldn't read from input file");
         if (frameCount==0) {
             printf("Done reading from file\n");
@@ -115,7 +117,7 @@ void Convert(MyAudioConverterSettings* mySettings){
              "Couldn't set client data format on input ext file");
     
     fprintf(stdout, "Converting...\n");
-    Convert(&audioConverterSettings);
+    Converter(&audioConverterSettings);
     
 cleanup:
     ExtAudioFileDispose(audioConverterSettings.inputFile);
