@@ -226,14 +226,13 @@ static void MyAQInputCallback(void *inUserData, AudioQueueRef inQueue,
     [session setActive:YES error:&error];
     
     //let core audio fill in other fields of the asbd
-    /*UInt32 propSize = sizeof(recordFormat);
+    UInt32 propSize = sizeof(recordFormat);
     checkErr(AudioFormatGetProperty(kAudioFormatProperty_FormatInfo,
                                     0,
                                     NULL,
                                     &propSize,
                                     &recordFormat),
              "AudioFormatGetProperty failed");
-    */
     
     //init audio queue
     checkErr(AudioQueueNewInput(&recordFormat,
@@ -245,15 +244,14 @@ static void MyAQInputCallback(void *inUserData, AudioQueueRef inQueue,
                                 &queue), "AudioQueueNewInput failed") ;
     
     //fill in the recordFormat asbd with asbd of audio queue
-    /*checkErr(AudioQueueGetProperty(queue,
+    checkErr(AudioQueueGetProperty(queue,
                                    kAudioConverterCurrentOutputStreamDescription,
                                    &recordFormat,
                                    &propSize),
              "Couldn't get queue's format");
-    */
     
     //create audio file
-    /*NSString* myFileString = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString* myFileString = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSURL* myFileURL = [NSURL fileURLWithPath:[myFileString stringByAppendingPathComponent:@"sample.caf"]];
     
     checkErr(AudioFileCreateWithURL((__bridge CFURLRef)myFileURL,
@@ -262,14 +260,13 @@ static void MyAQInputCallback(void *inUserData, AudioQueueRef inQueue,
                                     kAudioFileFlags_EraseFile,
                                     &recorder.recordFile),
              "AudioFileCreateWithURL failed");
-    */
     
     //copy magic cookie of audioqueue to file
-    //MyCopyEncoderCookieToFile(queue,recorder.recordFile);
+    MyCopyEncoderCookieToFile(queue,recorder.recordFile);
     
     //get the optimal size of audio buffers of 0.5 seconds
     int bufferByteSize = MyComputeRecordBufferSize(&recordFormat,queue,0.5);
-    //NSLog(@"buffer size:%d",bufferByteSize);
+    NSLog(@"buffer size:%d",bufferByteSize)
     
     //allocate AudioQueueBuffers and enqueue them to the audio queue
     for (int bufferIndex = 0; bufferIndex<kNumberRecordBuffers; bufferIndex++) {
@@ -286,10 +283,9 @@ static void MyAQInputCallback(void *inUserData, AudioQueueRef inQueue,
     }
     
     //enable level metering in order to get volume
-    /*UInt32 enableLM = 1;
+    UInt32 enableLM = 1;
     UInt32 size = sizeof(enableLM);
     AudioQueueSetProperty(queue, kAudioQueueProperty_EnableLevelMetering, &enableLM, size);
-    */
     
     //start audio queue
     recorder.running = TRUE;

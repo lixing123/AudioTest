@@ -14,6 +14,9 @@ typedef struct MyRecorder{
     AudioStreamBasicDescription inputFormat;
     AudioQueueRef inputQueue;
     
+    AudioFileID recordFile;
+    SInt64 currentPacketPosition;
+    
     AudioStreamBasicDescription outputFormat;
     AudioQueueRef outputQueue;
     
@@ -59,12 +62,22 @@ void MyAudioQueueInputCallback ( void *inUserData,
                                 const AudioStreamPacketDescription *inPacketDescs ){
     
     MyRecorder* myRecorder = (MyRecorder*)inUserData;
-    NSLog(@"input callback");
     
-    //copy audio data
+    //copy audio data so that we can playback in the MyAudioQueueOutputCallback
     myRecorder->bufferSize = inBuffer->mAudioDataByteSize;
     myRecorder->currentBuffer = malloc(sizeof(UInt8)*myRecorder->bufferSize);
     memcpy(myRecorder->currentBuffer, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
+    
+    //write data to the output file
+    checkErr(AudioFileWritePackets(myRecorder->recordFile,
+                                   false,
+                                   inBuffer->mAudioDataByteSize,
+                                   NULL,
+                                   myRecorder->currentPacketPosition,
+                                   &inNumberPacketDescriptions,
+                                   inBuffer->mAudioData),
+             "AudioFileWritePackets failed");
+    myRecorder->currentPacketPosition += inNumberPacketDescriptions;
     
     checkErr(AudioQueueEnqueueBuffer(inAQ,
                                      inBuffer,
@@ -77,7 +90,6 @@ void MyAudioQueueInputCallback ( void *inUserData,
 void MyAudioQueueOutputCallback( void *inUserData,
                                 AudioQueueRef inAQ,
                                 AudioQueueBufferRef inBuffer ){
-    NSLog(@"output callback");
     
     MyRecorder* myRecorder = (MyRecorder*)inUserData;
     
@@ -96,7 +108,7 @@ void MyAudioQueueOutputCallback( void *inUserData,
 @implementation PlayAndRecord
 
 -(void)start{
-    //start recordAndPlay category
+    //set RecordAndPlay category so that the app is able to get recorded data from the microphone
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSError* error;
     [session setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
@@ -106,6 +118,16 @@ void MyAudioQueueOutputCallback( void *inUserData,
     [session setActive:YES error:&error];
     if (error!=noErr) {
         NSLog(@"AVAudioSession set active error:%@",error);
+    }
+    
+    //record from the default built-in microphone
+    
+    NSArray* inputArray = [[AVAudioSession sharedInstance] availableInputs];
+    for (AVAudioSessionPortDescription* desc in inputArray) {
+        if ([desc.portType isEqualToString:AVAudioSessionPortBuiltInMic]) {
+            NSError* error;
+            [[AVAudioSession sharedInstance] setPreferredInput:desc error:&error];
+        }
     }
     
     //initialize the input format
@@ -145,6 +167,18 @@ void MyAudioQueueOutputCallback( void *inUserData,
                                          NULL),
                  "AudioQueueEnqueueBuffer failed");
     }
+    
+    //set up file format so that we can write the recorded data to it
+    //create audio file
+    NSString* myFileString = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSURL* myFileURL = [NSURL fileURLWithPath:[myFileString stringByAppendingPathComponent:@"playAndRecord.caf"]];
+    
+    checkErr(AudioFileCreateWithURL((__bridge CFURLRef)myFileURL,
+                                    kAudioFileCAFType,
+                                    &myRecorder.inputFormat,
+                                    kAudioFileFlags_EraseFile,
+                                    &myRecorder.recordFile),
+             "AudioFileCreateWithURL failed");
     
     //start audio queue
     //myRecorder.isRunning = true;
