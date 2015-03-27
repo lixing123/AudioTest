@@ -10,6 +10,8 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
+#define kAudioSampleRate 44100;
+
 typedef struct MyRecorder{
     AudioStreamBasicDescription inputFormat;
     AudioQueueRef inputQueue;
@@ -20,7 +22,10 @@ typedef struct MyRecorder{
     AudioStreamBasicDescription outputFormat;
     AudioQueueRef outputQueue;
     
-    void* currentBuffer;
+    UInt16* currentBuffer;
+    UInt16* previousBuffer;//used to remove echo effect
+    float echoFactor;
+    
     size_t bufferSize;
     
     BOOL isRunning;
@@ -51,7 +56,7 @@ static UInt32 MyCalculateRecordBufferSize(const AudioStreamBasicDescription* asb
                                           AudioQueueRef audioQueue,
                                           float seconds){
     //return 128*1024;
-    return 44100*1.0;
+    return kAudioSampleRate;
 }
 
 void MyAudioQueueInputCallback ( void *inUserData,
@@ -62,11 +67,27 @@ void MyAudioQueueInputCallback ( void *inUserData,
                                 const AudioStreamPacketDescription *inPacketDescs ){
     
     MyRecorder* myRecorder = (MyRecorder*)inUserData;
+    myRecorder->bufferSize = inBuffer->mAudioDataByteSize;
+    myRecorder->previousBuffer = malloc(sizeof(UInt16)*inBuffer->mAudioDataByteSize);
+    myRecorder->currentBuffer = malloc(sizeof(UInt16)*myRecorder->bufferSize);
+    
+    //copy audio data to previousBuffer for later echo effect
+    memcpy(myRecorder->previousBuffer,
+           myRecorder->currentBuffer,
+           myRecorder->bufferSize);
     
     //copy audio data so that we can playback in the MyAudioQueueOutputCallback
-    myRecorder->bufferSize = inBuffer->mAudioDataByteSize;
-    myRecorder->currentBuffer = malloc(sizeof(UInt8)*myRecorder->bufferSize);
-    memcpy(myRecorder->currentBuffer, inBuffer->mAudioData, inBuffer->mAudioDataByteSize);
+    memcpy(myRecorder->currentBuffer,
+           inBuffer->mAudioData,
+           inBuffer->mAudioDataByteSize);
+    
+    NSLog(@"buffer size:%zu",myRecorder->bufferSize);
+    //try to remove echo effect while recording using headset microphone, but failed
+    for (int i=0; i<myRecorder->bufferSize; i++) {
+        UInt16 data = CFSwapInt16BigToHost(myRecorder->currentBuffer[i]);
+        myRecorder->currentBuffer[i] = CFSwapInt16HostToBig(data - myRecorder->echoFactor*myRecorder->previousBuffer[i]);
+    }
+    NSLog(@"factor:%f",myRecorder->echoFactor);
     
     //write data to the output file
     checkErr(AudioFileWritePackets(myRecorder->recordFile,
@@ -121,7 +142,6 @@ void MyAudioQueueOutputCallback( void *inUserData,
     }
     
     //record from the default built-in microphone
-    
     NSArray* inputArray = [[AVAudioSession sharedInstance] availableInputs];
     for (AVAudioSessionPortDescription* desc in inputArray) {
         if ([desc.portType isEqualToString:AVAudioSessionPortBuiltInMic]) {
@@ -133,7 +153,7 @@ void MyAudioQueueOutputCallback( void *inUserData,
     //initialize the input format
     myRecorder.inputFormat.mFormatID = kAudioFormatLinearPCM;
     myRecorder.inputFormat.mFormatFlags = kAudioFormatFlagIsBigEndian | kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
-    myRecorder.inputFormat.mSampleRate = 44100;
+    myRecorder.inputFormat.mSampleRate = kAudioSampleRate;
     myRecorder.inputFormat.mFramesPerPacket = 1;
     myRecorder.inputFormat.mBitsPerChannel = 16;
     myRecorder.inputFormat.mBytesPerFrame = 4;
@@ -181,7 +201,8 @@ void MyAudioQueueOutputCallback( void *inUserData,
              "AudioFileCreateWithURL failed");
     
     //start audio queue
-    //myRecorder.isRunning = true;
+    myRecorder.isRunning = true;
+    myRecorder.echoFactor = 0.1;
     checkErr(AudioQueueStart(myRecorder.inputQueue,
                              NULL),
              "Start input audio queue failed");
@@ -189,7 +210,7 @@ void MyAudioQueueOutputCallback( void *inUserData,
     //initialize output asbd
     myRecorder.outputFormat.mFormatID = kAudioFormatLinearPCM;
     myRecorder.outputFormat.mFormatFlags = kAudioFormatFlagIsBigEndian | kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
-    myRecorder.outputFormat.mSampleRate = 44100;
+    myRecorder.outputFormat.mSampleRate = kAudioSampleRate;
     myRecorder.outputFormat.mFramesPerPacket = 1;
     myRecorder.outputFormat.mBitsPerChannel = 16;
     myRecorder.outputFormat.mBytesPerFrame = 4;
@@ -230,7 +251,10 @@ void MyAudioQueueOutputCallback( void *inUserData,
     checkErr(AudioQueueStart(myRecorder.outputQueue,
                              NULL),
              "Start Output Queue failed");
-    
+}
+
+-(void)changeEchoFactor:(float)echoFactor{
+    myRecorder.echoFactor = echoFactor;
 }
 
 @end

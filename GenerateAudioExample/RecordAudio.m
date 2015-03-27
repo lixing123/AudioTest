@@ -266,7 +266,7 @@ static void MyAQInputCallback(void *inUserData, AudioQueueRef inQueue,
     
     //get the optimal size of audio buffers of 0.5 seconds
     int bufferByteSize = MyComputeRecordBufferSize(&recordFormat,queue,0.5);
-    NSLog(@"buffer size:%d",bufferByteSize)
+    NSLog(@"buffer size:%d",bufferByteSize);
     
     //allocate AudioQueueBuffers and enqueue them to the audio queue
     for (int bufferIndex = 0; bufferIndex<kNumberRecordBuffers; bufferIndex++) {

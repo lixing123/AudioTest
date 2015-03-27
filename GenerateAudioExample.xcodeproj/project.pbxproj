@@ -23,6 +23,7 @@
 		8E7D518E1ABBB05600DF1B01 /* PlayAndRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D518D1ABBB05600DF1B01 /* PlayAndRecord.m */; };
 		8E7D51911ABBC84700DF1B01 /* Converter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D51901ABBC84700DF1B01 /* Converter.m */; };
 		8E7D51A61AC00FDB00DF1B01 /* ExtConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D51A51AC00FDB00DF1B01 /* ExtConvert.m */; };
+		8E7D51C41AC5097B00DF1B01 /* AudioUnitTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D51C31AC5097B00DF1B01 /* AudioUnitTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,8 @@
 		8E7D51901ABBC84700DF1B01 /* Converter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Converter.m; sourceTree = "<group>"; };
 		8E7D51A41AC00FDB00DF1B01 /* ExtConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExtConvert.h; sourceTree = "<group>"; };
 		8E7D51A51AC00FDB00DF1B01 /* ExtConvert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExtConvert.m; sourceTree = "<group>"; };
+		8E7D51C21AC5097B00DF1B01 /* AudioUnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioUnitTest.h; sourceTree = "<group>"; };
+		8E7D51C31AC5097B00DF1B01 /* AudioUnitTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioUnitTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +130,8 @@
 				8E7D51A51AC00FDB00DF1B01 /* ExtConvert.m */,
 				8E3A62281AA1B871000A3573 /* ExtAudioFileMixer.h */,
 				8E3A62291AA1B871000A3573 /* ExtAudioFileMixer.m */,
+				8E7D51C21AC5097B00DF1B01 /* AudioUnitTest.h */,
+				8E7D51C31AC5097B00DF1B01 /* AudioUnitTest.m */,
 				8E3A61F31A9EB18A000A3573 /* Main.storyboard */,
 				8E3A61F61A9EB18A000A3573 /* Images.xcassets */,
 				8E3A61F81A9EB18A000A3573 /* LaunchScreen.xib */,
@@ -263,6 +268,7 @@
 			files = (
 				8E7D518E1ABBB05600DF1B01 /* PlayAndRecord.m in Sources */,
 				8E3A61F21A9EB18A000A3573 /* ViewController.m in Sources */,
+				8E7D51C41AC5097B00DF1B01 /* AudioUnitTest.m in Sources */,
 				8E3A61EF1A9EB18A000A3573 /* AppDelegate.m in Sources */,
 				8E65920D1AB1907D009F97C2 /* RecordAudio.m in Sources */,
 				8E7D51A61AC00FDB00DF1B01 /* ExtConvert.m in Sources */,

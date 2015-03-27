@@ -11,14 +11,17 @@
 #import "PlayAudio.h"
 #import "Converter.h"
 #import "PlayAndRecord.h"
+#import "AudioUnitTest.h"
 
 @interface ViewController ()
 
 @end
 
+PlayAndRecord* playAndRecord;
+UITextField* textField;
+UIButton* submit;
+
 @implementation ViewController
-
-
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -38,10 +41,28 @@
     [converter startConvert];
     */
     
-    
-    PlayAndRecord* playAndRecord = [[PlayAndRecord alloc] init];
+    /*
+    playAndRecord = [[PlayAndRecord alloc] init];
     [playAndRecord start];
     
+    textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
+    textField.keyboardType = UIKeyboardTypeDecimalPad;
+    textField.placeholder = @"input...";
+    [self.view addSubview:textField];
+    
+    submit = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [submit setTitle:@"Submit" forState:UIControlStateNormal];
+    [submit setFrame:CGRectMake(0, 150, 320, 100)];
+    [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:submit];*/
+    
+    AudioUnitTest* test = [[AudioUnitTest alloc] init];
+    [test start];
+}
+
+-(void)submit{
+    float factor = [textField.text floatValue];
+    [playAndRecord changeEchoFactor:factor];
 }
 
 - (void)didReceiveMemoryWarning {
